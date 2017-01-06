@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using APKScanWeb.Models;
 namespace APKScanWeb
 {
     public class Startup
@@ -18,6 +18,7 @@ namespace APKScanWeb
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile("configuration.json", false, true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
@@ -29,6 +30,10 @@ namespace APKScanWeb
         {
             // Add framework services.
             services.AddMvc();
+            //load configuration
+            services.Configure<Configuration>(Configuration.GetSection("Configuration"));
+            services.AddSingleton<IConfiguration>(Configuration);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

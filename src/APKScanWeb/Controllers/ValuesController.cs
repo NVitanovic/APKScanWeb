@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using APKScanWeb.Models;
+using Microsoft.Extensions.Options;
 
 namespace APKScanWeb.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class ValuesController : ConfigController
     {
+        public ValuesController(IOptions<Configuration> settings) : base(settings) {}
+
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+           
+            return new string[] { "value1", "value2", config.cassandra.keyspace, config.cassandra.servers[0] };
         }
 
         // GET api/values/5
