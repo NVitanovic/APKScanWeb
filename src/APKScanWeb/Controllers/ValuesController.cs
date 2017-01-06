@@ -5,12 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using APKScanWeb.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
+using System.IO;
+using System.Net.Http;
+using System.Net;
 
 namespace APKScanWeb.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : ConfigController
     {
+        public IFormFile myFile { set; get; }
+
         public ValuesController(IOptions<Configuration> settings) : base(settings) {}
 
         // GET api/values
@@ -18,7 +25,7 @@ namespace APKScanWeb.Controllers
         public IEnumerable<string> Get()
         {
            
-            return new string[] { "value1", "value2", config.cassandra.keyspace, config.cassandra.servers[0] };
+            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0] };
         }
 
         // GET api/values/5
@@ -30,11 +37,19 @@ namespace APKScanWeb.Controllers
 
             return outp;
         }
-
+        //PRIMER UPLOADA PREKO POSTa
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public async Task<string> Post()
         {
+            var uploadedFile = Request.Form.Files["file"];
+            if(uploadedFile == null)
+                throw new Exception("Error while uploading the file NULL!");
+
+            var x = new byte[uploadedFile.Length];
+            uploadedFile.OpenReadStream().Read(x, 0, Convert.ToInt32(uploadedFile.Length));
+
+            return await Task.FromResult<string>(Helpers.GetMD5HashFromBytes(x));
         }
 
         // PUT api/values/5

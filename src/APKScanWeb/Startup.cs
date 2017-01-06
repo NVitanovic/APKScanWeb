@@ -33,7 +33,6 @@ namespace APKScanWeb
             //load configuration
             services.Configure<Configuration>(Configuration.GetSection("Configuration"));
             services.AddSingleton<IConfiguration>(Configuration);
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
