@@ -25,7 +25,7 @@ namespace APKScanWeb.Controllers
         public IEnumerable<string> Get()
         {
            
-            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0] };
+            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis() };
         }
 
         // GET api/values/5
@@ -48,7 +48,7 @@ namespace APKScanWeb.Controllers
 
             var x = new byte[uploadedFile.Length];
             uploadedFile.OpenReadStream().Read(x, 0, Convert.ToInt32(uploadedFile.Length));
-
+            
             return await Task.FromResult<string>(Helpers.GetMD5HashFromBytes(x));
         }
 

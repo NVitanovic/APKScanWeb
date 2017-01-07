@@ -13,7 +13,8 @@ namespace APKScanWeb.Models
     }
     public class Redis
     {
-        public List<string> servers { get; set; }
+        public List<string> masters { get; set; }
+        public List<string> slaves { get; set; }
         public string username { get; set; }
         public string password { get; set; }
     }

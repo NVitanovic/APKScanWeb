@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using APKScanWeb.Models;
+using Microsoft.Extensions.Options;
+
 namespace APKScanWeb
 {
     public class Startup
@@ -31,8 +33,14 @@ namespace APKScanWeb
             // Add framework services.
             services.AddMvc();
             //load configuration
-            services.Configure<Configuration>(Configuration.GetSection("Configuration"));
+            var cfg = Configuration.GetSection("Configuration");
+            services.Configure<Configuration>(cfg);
             services.AddSingleton<IConfiguration>(Configuration);
+
+            //make configuration global
+            Program.config = ConfigurationExtensions.Get<Models.Configuration>(Configuration, "Configuration");
+
+            //
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +50,16 @@ namespace APKScanWeb
             loggerFactory.AddDebug();
 
             app.UseMvc();
+        }
+    }
+    //make configuration great again
+    public static class ConfigurationExtensions
+    {
+        public static T Get<T>(this IConfiguration config, string key) where T : new()
+        {
+            var instance = new T();
+            config.GetSection(key).Bind(instance);
+            return instance;
         }
     }
 }

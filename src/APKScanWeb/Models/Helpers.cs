@@ -36,5 +36,12 @@ namespace APKScanWeb.Models
             return sb.ToString();
         }
 
+        public static string TestLatencyRedis()
+        {
+            DataLayer dl = DataLayer.GetInstance();
+            var x = dl.redis.Ping();
+            return x.TotalSeconds.ToString();
+        }
+
     }
 }

@@ -17,7 +17,7 @@ namespace APKScanWeb.Controllers
         public ConfigController(IOptions<Configuration> settings)
         {
             config = settings.Value;
-
+            
             if(Program.config == null)
                 Program.config = config;
         }
