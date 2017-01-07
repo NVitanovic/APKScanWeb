@@ -42,6 +42,19 @@ namespace APKScanWeb.Models
             var x = dl.redis.Ping();
             return x.TotalSeconds.ToString();
         }
+        public static string TestCassandra()
+        {
+            string x = "";
+            DataLayer dl = DataLayer.GetInstance();
+            var rs = dl.cassandra.Execute("select * from files");
+            foreach (var row in rs)
+            {
+                var value = row.GetValue<string>("hash");
+                x += value + "\n";
+                //do something with the value
+            }
+            return x;
+        }
 
     }
 }

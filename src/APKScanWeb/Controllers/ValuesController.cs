@@ -24,8 +24,7 @@ namespace APKScanWeb.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-           
-            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis() };
+            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
         }
 
         // GET api/values/5
