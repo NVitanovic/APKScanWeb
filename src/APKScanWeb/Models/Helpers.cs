@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,5 +57,33 @@ namespace APKScanWeb.Models
             return x;
         }
 
+        public static List<string> lista = new List<string>();
+        public static string WriteToSend(string data)
+        {
+            DataLayer dl = DataLayer.GetInstance();
+            ISubscriber sub = dl.redisCluster.GetSubscriber();
+            string log = "ListLeftPush:";
+            log += dl.redis.ListLeftPush("send", data) + " Publish:";
+            log += sub.Publish("send", "");
+            return log;
+        }
+        public static string ReadFromReceive()
+        {
+            DataLayer dl = DataLayer.GetInstance();
+            ISubscriber sub = dl.redisCluster.GetSubscriber();
+            string log = "";
+            while (true)
+            {
+                string work = dl.redis.ListRightPop("receive");
+                if (work != null)
+                {
+                    log += work + "\n";
+                }
+                else
+                    break;
+            }
+            return log;
+        }
+        
     }
 }

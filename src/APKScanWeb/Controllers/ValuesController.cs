@@ -17,16 +17,27 @@ namespace APKScanWeb.Controllers
     public class ValuesController : ConfigController
     {
         public IFormFile myFile { set; get; }
-
+        
         public ValuesController(IOptions<Configuration> settings) : base(settings) {}
 
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2", Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
+            return new string[] { "value1", "value2" }; //Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
         }
-
+        // GET api/values/send/{val}
+        [HttpGet("send/{val}")]
+        public string Send(string val)
+        {
+            return val + " " + Helpers.WriteToSend(val);
+        }
+        // GET api/values/test/{val}
+        [HttpGet("receive")]
+        public string Receive()
+        {
+            return Helpers.ReadFromReceive();
+        }
         // GET api/values/5
         [HttpGet("{id}")]
         public Dictionary<string,string> Get(int id)

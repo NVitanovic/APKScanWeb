@@ -61,7 +61,26 @@ namespace APKScanWeb
 
                 if(redis == null)
                     redis = redisCluster.GetDatabase();
+
+
+                //privremeno pokrecemo testSubscribe
+                //testSubscribe();
             }
         }
+        /*public void testSubscribe()
+        {
+            ISubscriber sub = redisCluster.GetSubscriber();
+            sub.Subscribe("receive", (channel, message) =>
+            {
+                while (true)
+                {
+                    string work = redis.ListRightPop("receive");
+                    if (work != null)
+                    {
+                        Console.WriteLine("Subscrb: " + (string)work);
+                    }
+                }
+            });
+       }*/
     }
 }
