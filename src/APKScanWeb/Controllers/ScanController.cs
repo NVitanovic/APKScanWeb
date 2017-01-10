@@ -13,63 +13,55 @@ namespace APKScanWeb.Controllers
     public class ScanController : ConfigController
     {
         private Scan scanModel = new Scan();
-
+        //-------------------------------------------------------------------------------------------------------------------------------
         public ScanController(IOptions<Configuration> settings) : base(settings)
-        {
-        }
-
+        {}
+        //-------------------------------------------------------------------------------------------------------------------------------
         [HttpGet("{hash}")]
         public JsonResult Get(string hash)
         {
             var error =  new { error = "Invalid md5 hash!" };
+
+            //check the validity of the md5 hash
             if (!hash.All(char.IsLetterOrDigit))
                 return Json(error);
+
+            //get the scan result
             var result = scanModel.getScanResult(hash);
             return Json(result);
         }
+        //-------------------------------------------------------------------------------------------------------------------------------
         // upload the file to the server for scanning
-        // POST api/values
+        // POST api/scan
         [HttpPost]
         public async Task<JsonResult> Post()
         {
-            Console.WriteLine("0");
-            //get the file from the body
-            var uploadedFile = Request.Form.Files["file"];
-            if (uploadedFile == null)
-                throw new Exception("Error while uploading the file NULL!");
+            var error = new { error = "Error while uploading the file!" };
 
-            Console.WriteLine("1");
+            //get the "file" from the body
+            var uploadedFile = Request.Form.Files["file"];
+            var uploadIp = Request.Headers["X-Forwarded-For"];
+
+            //check if the uploaded file is actually sent
+            if (uploadedFile == null)
+                return await Task.FromResult<JsonResult>(Json(error));
+            //throw new Exception("Error while uploading the file NULL!");
+
             //now lets read the file data
             var fileData = new byte[uploadedFile.Length];
             uploadedFile.OpenReadStream().Read(fileData, 0, Convert.ToInt32(uploadedFile.Length));
 
-            Console.WriteLine("2");
             //generate md5 hash and write the file to the specific directory
             var md5 = Helpers.GetMD5HashFromBytes(fileData);
-            if(!scanModel.uploadToDirectory(Program.config.fileuploadpath, md5, fileData))
-            {
-                var error = new { error = "Error while uploading the file!" };
+            if(!scanModel.uploadToDirectory(config.fileuploadpath, md5, fileData))
                 return await Task.FromResult<JsonResult>(Json(error));
-            }
 
-            Console.WriteLine("3");
-            //Put the file to the redis queue
-            var num = scanModel.addFileToRedisQueue(uploadedFile.FileName, md5);
+            //put the file to the redis queue
+            var num = scanModel.addFileToRedisQueue(uploadedFile.FileName, md5, uploadIp);
 
-            Console.WriteLine("4");
+            //show the result and queue number
             return await Task.FromResult<JsonResult>(Json(new { success = "File uploaded successfully!", queue = num }));
         }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        //-------------------------------------------------------------------------------------------------------------------------------
     }
 }

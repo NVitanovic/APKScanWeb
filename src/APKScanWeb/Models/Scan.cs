@@ -7,6 +7,8 @@ using Cassandra;
 using Newtonsoft.Json;
 using Cassandra.Mapping;
 using System.IO;
+using APKScanSharedClasses;
+
 namespace APKScanWeb.Models
 {
     public class Scan
@@ -82,11 +84,14 @@ namespace APKScanWeb.Models
         {
             //Result should not be used as it is not a proper object
             //ip is currently not used
-            Result obj = new Result();
-            obj.av = null;
-            obj.filename.Add(filename);
+            RedisSend obj = new RedisSend();
+
+            //form the object and add the data needed
+            obj.filename = filename;
             obj.hash = hash;
-            obj.hits = 0;
+            obj.upload_ip = ip;
+            obj.upload_date = DateTime.UtcNow;
+
             string data = JsonConvert.SerializeObject(obj);
             long queueNumber = dl.redis.ListLeftPush("send", data);
             return queueNumber;
