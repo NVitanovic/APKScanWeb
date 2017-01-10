@@ -70,12 +70,26 @@ namespace APKScanWeb.Models
         }
         public bool uploadToDirectory(string directory, string filename, byte [] data)
         {
-            FileStream fs = new FileStream(directory + filename, FileMode.CreateNew);
+            FileStream fs = new FileStream(directory + filename, FileMode.Create);
+            BinaryWriter bw = new BinaryWriter(fs);
             if (fs.CanWrite)
-                fs.Write(data, 0, data.Length);
+                bw.Write(data, 0, data.Length);
             else
                 return false;
             return true;
+        }
+        public long addFileToRedisQueue(string filename, string hash, string ip = "")
+        {
+            //Result should not be used as it is not a proper object
+            //ip is currently not used
+            Result obj = new Result();
+            obj.av = null;
+            obj.filename.Add(filename);
+            obj.hash = hash;
+            obj.hits = 0;
+            string data = JsonConvert.SerializeObject(obj);
+            long queueNumber = dl.redis.ListLeftPush("send", data);
+            return queueNumber;
         }
     }
 }

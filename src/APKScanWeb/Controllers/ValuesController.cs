@@ -58,8 +58,11 @@ namespace APKScanWeb.Controllers
 
             var x = new byte[uploadedFile.Length];
             uploadedFile.OpenReadStream().Read(x, 0, Convert.ToInt32(uploadedFile.Length));
-            
-            return await Task.FromResult<string>(Helpers.GetMD5HashFromBytes(x));
+            Scan sc = new Scan();
+            var md5 = Helpers.GetMD5HashFromBytes(x);
+            if(sc.uploadToDirectory(config.fileuploadpath, md5 + ".apk", x))
+                return await Task.FromResult<string>("true");
+            return await Task.FromResult<string>("false");
         }
 
         // PUT api/values/5

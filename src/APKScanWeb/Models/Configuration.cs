@@ -9,6 +9,7 @@ namespace APKScanWeb.Models
     {
         public Redis redis { get; set; }
         public Cassandra cassandra { get; set; }
+        public string fileuploadpath { get; set; }
         
     }
     public class Redis
