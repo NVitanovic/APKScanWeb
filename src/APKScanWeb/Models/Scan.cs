@@ -70,7 +70,12 @@ namespace APKScanWeb.Models
         }
         public bool uploadToDirectory(string directory, string filename, byte [] data)
         {
-            File.Cre
+            FileStream fs = new FileStream(directory + filename, FileMode.CreateNew);
+            if (fs.CanWrite)
+                fs.Write(data, 0, data.Length);
+            else
+                return false;
+            return true;
         }
     }
 }
