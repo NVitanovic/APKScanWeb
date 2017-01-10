@@ -60,7 +60,7 @@ namespace APKScanWeb.Controllers
             var num = scanModel.addFileToRedisQueue(uploadedFile.FileName, md5, uploadIp);
 
             //show the result and queue number
-            return await Task.FromResult<JsonResult>(Json(new { success = "File uploaded successfully!", queue = num }));
+            return await Task.FromResult<JsonResult>(Json(new { success = "File uploaded successfully!", queue = num, hash = md5 }));
         }
         //-------------------------------------------------------------------------------------------------------------------------------
     }
