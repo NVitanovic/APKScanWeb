@@ -95,7 +95,7 @@ namespace APKScanWeb.Models
                 return false;
             return true;
         }
-        public long addFileToRedisSendQueue(string filename, string hash, string ip = "")
+        public long addFileToRedisSendQueue(string filename, string hash, string ip = "0.0.0.0")
         {
             //Result should not be used as it is not a proper object
             //ip is currently not used
@@ -104,7 +104,7 @@ namespace APKScanWeb.Models
             //form the object and add the data needed
             obj.filename = filename;
             obj.hash = hash;
-            obj.upload_ip = ip;
+            obj.upload_ip = ip == null?"0.0.0.0":ip;
             obj.upload_date = DateTime.UtcNow;
 
             //serialize the object and push it to the list
