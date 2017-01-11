@@ -59,7 +59,7 @@ namespace APKScanWeb.Models
                         throw new Exception("Error while trying to write to Redis server from the background Thread!");
                 }
                 Thread.Sleep(10000);
-            }
+          }
         }
     }
 }

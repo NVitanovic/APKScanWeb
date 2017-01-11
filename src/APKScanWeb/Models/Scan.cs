@@ -59,7 +59,7 @@ namespace APKScanWeb.Models
             if (existsInCassandra(hash))
             {
                 IMapper mapper = new Mapper(dl.cassandra);
-                Result result = mapper.Single<Result>("SELECT hash,filename,hits,av FROM files WHERE hash = ?", hash);
+                Result result = mapper.Single<Result>("SELECT hash,filename,hits,av,upload_ip FROM files WHERE hash = ?", hash);
                 return result;
             }
             return null;
@@ -145,19 +145,55 @@ namespace APKScanWeb.Models
         public bool addScanResultToCassandra(RedisReceive result)
         {
             List<string> upload_ip = new List<string>();
-            upload_ip.Add(result.upload_ip == null?"0.0.0.0": result.upload_ip);
+            upload_ip.Add(result.upload_ip == null ? "0.0.0.0" : result.upload_ip);
             List<string> filename = new List<string>();
             filename.Add(result.filename);
+            int hits = 0;
+            Dictionary<string, string> av = new Dictionary<string, string>(result.av_results);
 
-            //var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, hits, av, last_access) VALUES(?, ?, ?, 0, ?, null);");
-            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, hits, upload_ip, av) VALUES(?, ?, 0, ?, ?);");
+            //get the existing result
+            var existingResult = getScanResultFromCassandra(result.hash);
 
-            var statement = query.Bind(result.hash, filename, upload_ip, result.av_results);
+            if(existingResult != null)
+            {
+                //for every existing ip check if it matches the new ip if it does not then just add it to the existing pile
+                for(int i = 0; i < existingResult.upload_ip.Count; i++)
+                {
+                    //check if the ip is already in the list
+                    if (upload_ip.IndexOf(existingResult.upload_ip[i]) != -1)
+                        continue;
+
+                    //add the value that does not exist in the ip list
+                    upload_ip.Add(existingResult.upload_ip[i]);
+                }
+                // do the same for filenames
+                for (int i = 0; i < existingResult.filename.Count; i++)
+                {
+                    //check if the filename is already in the list
+                    if (filename.IndexOf(existingResult.filename[i]) != -1)
+                        continue;
+
+                    //add the value that does not exist in the filename list
+                    filename.Add(existingResult.filename[i]);
+                }
+
+                //set the hits value to the same one
+                hits = existingResult.hits;
+
+                //now the av check
+                foreach(var x in existingResult.av)
+                {
+                    //only add the missing values and accept all new scans
+                    if(!av.ContainsKey(x.Key))
+                        av.Add(x.Key, x.Value);
+                }
+            }
+
+            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, hits, upload_ip, av) VALUES(?, ?, ?, ?, ?);");
+
+            var statement = query.Bind(result.hash, filename, hits, upload_ip, av);
             statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var res = dl.cassandra.Execute(statement);
-
-            //var avres = JsonConvert.SerializeObject(result.av_results);
-            //var res = dl.cassandra.Execute($"INSERT INTO files(hash, filename, upload_ip, hits, av) VALUES('{result.hash}', '{result.filename}', '{result.upload_ip}', 0, '{avres}');");
 
             return true;
         }
