@@ -43,21 +43,25 @@ namespace APKScanWeb.Models
         {
             while (true)
             {
-                //get the data from Redis receive queue
-                string rawData = dl.redis.ListRightPop("receive");
-                //if there is data
-                if (rawData != null)
+                try
                 {
-                    //deserialize object
-                    RedisReceive obj = JsonConvert.DeserializeObject<RedisReceive>(rawData);
+                    //get the data from Redis receive queue
+                    string rawData = dl.redis.ListRightPop("receive");
+                    //if there is data
+                    if (rawData != null)
+                    {
+                        //deserialize object
+                        RedisReceive obj = JsonConvert.DeserializeObject<RedisReceive>(rawData);
 
-                    //Add to the Cassandra Server
-                    if (!scanModel.addScanResultToCassandra(obj))
-                        throw new Exception("Error while trying to write to Cassandra server from the background Thread!");
-                    //Add to the Redis cache
-                    if (!scanModel.addScanResultToRedisCache(obj))
-                        throw new Exception("Error while trying to write to Redis server from the background Thread!");
+                        //Add to the Cassandra Server
+                        if (!scanModel.addScanResultToCassandra(obj))
+                            throw new Exception("Error while trying to write to Cassandra server from the background Thread!");
+                        //Add to the Redis cache
+                        if (!scanModel.addScanResultToRedisCache(obj))
+                            throw new Exception("Error while trying to write to Redis server from the background Thread!");
+                    }
                 }
+                catch { }
                 Thread.Sleep(10000);
           }
         }
