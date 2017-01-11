@@ -16,19 +16,18 @@ namespace APKScanWeb
         public ConnectionMultiplexer redisCluster = null;
         public IDatabase redis = null;
         public static DataLayer singleton = null;
-        private static object  thislock = new object();
-        public static DataLayer GetInstance()
+        private static object  lockObj = new object();
+        public static DataLayer getInstance()
         {
             if (singleton == null)
             {
-                lock (thislock)
+                lock (lockObj)
                 {
                     if (singleton == null)
-                        return new DataLayer(Program.config);
+                        return singleton = new DataLayer(Program.config);
                     else
                         return singleton;
                 }
-
             }
             else
                 return singleton;

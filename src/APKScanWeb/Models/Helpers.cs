@@ -39,14 +39,14 @@ namespace APKScanWeb.Models
 
         public static string TestLatencyRedis()
         {
-            DataLayer dl = DataLayer.GetInstance();
+            DataLayer dl = DataLayer.getInstance();
             var x = dl.redis.Ping();
             return x.TotalSeconds.ToString();
         }
         public static string TestCassandra()
         {
             string x = "";
-            DataLayer dl = DataLayer.GetInstance();
+            DataLayer dl = DataLayer.getInstance();
             var rs = dl.cassandra.Execute("select * from files");
             foreach (var row in rs)
             {
@@ -60,7 +60,7 @@ namespace APKScanWeb.Models
         public static List<string> lista = new List<string>();
         public static string WriteToSend(string data)
         {
-            DataLayer dl = DataLayer.GetInstance();
+            DataLayer dl = DataLayer.getInstance();
             ISubscriber sub = dl.redisCluster.GetSubscriber();
             string log = "ListLeftPush:";
             log += dl.redis.ListLeftPush("send", data) + " Publish:";
@@ -69,7 +69,7 @@ namespace APKScanWeb.Models
         }
         public static string ReadFromReceive()
         {
-            DataLayer dl = DataLayer.GetInstance();
+            DataLayer dl = DataLayer.getInstance();
             ISubscriber sub = dl.redisCluster.GetSubscriber();
             string log = "";
             while (true)

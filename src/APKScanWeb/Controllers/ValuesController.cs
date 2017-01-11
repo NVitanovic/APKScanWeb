@@ -10,6 +10,8 @@ using Microsoft.Net.Http.Headers;
 using System.IO;
 using System.Net.Http;
 using System.Net;
+using APKScanSharedClasses;
+using Newtonsoft.Json;
 
 namespace APKScanWeb.Controllers
 {
@@ -22,9 +24,17 @@ namespace APKScanWeb.Controllers
 
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" }; //Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
+            RedisReceive rc = new RedisReceive();
+            rc.av_results.Add("AV1", "true");
+            rc.av_results.Add("AV2", "false");
+            rc.av_results.Add("AV3", "true");
+            rc.filename = "nekifajl";
+            rc.hash = "a5e9112cff236c1410016bae68e05d86";
+            rc.master_id = "master1";
+
+            return JsonConvert.SerializeObject(rc); //Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
         }
         // GET api/values/send/{val}
         [HttpGet("send/{val}")]

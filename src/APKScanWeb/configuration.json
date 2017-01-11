@@ -20,6 +20,6 @@
       ],
       "keyspace": "apkscan"
     },
-    "FileUploadPath":  "/tmp/upload/"
+    "FileUploadPath": "C:\\temp\\"
   }
 }

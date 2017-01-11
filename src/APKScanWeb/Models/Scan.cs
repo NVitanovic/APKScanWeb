@@ -8,17 +8,19 @@ using Newtonsoft.Json;
 using Cassandra.Mapping;
 using System.IO;
 using APKScanSharedClasses;
+using System.Threading;
 
 namespace APKScanWeb.Models
 {
     public class Scan
     {
+        private static bool isBGTaskRunning = false;
         DataLayer dl;
         public Scan()
         {
             try
             {
-                dl = DataLayer.GetInstance();
+                dl = DataLayer.getInstance();
             }
             catch
             {
@@ -33,11 +35,13 @@ namespace APKScanWeb.Models
         }
         public bool existsInCassandra(string hash)
         {
-            var query = dl.cassandra.Prepare("SELECT count(*) FROM files WHERE hash = ?");
-            var statement = new BatchStatement().Add(query.Bind(hash));
+            var query = dl.cassandra.Prepare("SELECT count(*) FROM files WHERE hash = ? limit 5000000");
+            var statement = query.Bind(hash);
+            statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var result = dl.cassandra.Execute(statement);
             var row = result.First();
-            if (row.GetValue<int>("count(*)") == 0)
+            var val = row.GetValue<Int64>(0); //Type must be Int64 (bigint)
+            if (val == 0) //first row
                 return false;
             return true;
         }
@@ -91,7 +95,7 @@ namespace APKScanWeb.Models
                 return false;
             return true;
         }
-        public long addFileToRedisQueue(string filename, string hash, string ip = "")
+        public long addFileToRedisSendQueue(string filename, string hash, string ip = "")
         {
             //Result should not be used as it is not a proper object
             //ip is currently not used
@@ -107,6 +111,20 @@ namespace APKScanWeb.Models
             string data = JsonConvert.SerializeObject(obj);
             long queueNumber = dl.redis.ListLeftPush("send", data);
             return queueNumber;
+        }
+        public bool addScanResultToRedisCache(RedisReceive result)
+        {
+            Result r = new Result();
+
+            r.hash = result.hash;
+            r.av = result.av_results;
+            r.filename.Add(result.filename);
+            r.hits = 0;
+            r.upload_ip.Add(result.upload_ip);
+
+            addScanResultToRedisCache(r);
+
+            return true;
         }
         public bool addScanResultToRedisCache(Result result)
         {
@@ -125,15 +143,15 @@ namespace APKScanWeb.Models
         }
         public bool addScanResultToCassandra(RedisReceive result)
         {
-            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, hits, av) VALUES(?, ?, ?, 0, ?)");
-            var statement = new BatchStatement()
-                .Add(query.Bind(result.hash))
-                .Add(query.Bind(result.filename))
-                .Add(query.Bind(result.upload_ip))
-                .Add(query.Bind(result.av_results));
+            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, hits, av) VALUES(?, ?, ?, 0, ?);");
+
+            var statement = query.Bind(result.hash, result.filename, result.upload_ip, result.av_results);
+            statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var res = dl.cassandra.Execute(statement);
 
             return true;
         }
+        
+        
     }
 }
