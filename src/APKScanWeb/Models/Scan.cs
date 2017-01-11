@@ -120,7 +120,8 @@ namespace APKScanWeb.Models
             r.av = result.av_results;
             r.filename.Add(result.filename);
             r.hits = 0;
-            r.upload_ip.Add(result.upload_ip);
+            //if upload ip is null
+            r.upload_ip.Add( (result.upload_ip == null)?"0.0.0.0": result.upload_ip);
 
             addScanResultToRedisCache(r);
 
@@ -143,11 +144,20 @@ namespace APKScanWeb.Models
         }
         public bool addScanResultToCassandra(RedisReceive result)
         {
-            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, hits, av) VALUES(?, ?, ?, 0, ?);");
+            List<string> upload_ip = new List<string>();
+            upload_ip.Add(result.upload_ip == null?"0.0.0.0": result.upload_ip);
+            List<string> filename = new List<string>();
+            filename.Add(result.filename);
 
-            var statement = query.Bind(result.hash, result.filename, result.upload_ip, result.av_results);
+            //var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, hits, av, last_access) VALUES(?, ?, ?, 0, ?, null);");
+            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, hits, upload_ip, av) VALUES(?, ?, 0, ?, ?);");
+
+            var statement = query.Bind(result.hash, filename, upload_ip, result.av_results);
             statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var res = dl.cassandra.Execute(statement);
+
+            //var avres = JsonConvert.SerializeObject(result.av_results);
+            //var res = dl.cassandra.Execute($"INSERT INTO files(hash, filename, upload_ip, hits, av) VALUES('{result.hash}', '{result.filename}', '{result.upload_ip}', 0, '{avres}');");
 
             return true;
         }
