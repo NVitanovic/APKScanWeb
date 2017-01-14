@@ -85,16 +85,34 @@ namespace APKScanWeb.Models
                 
             return null;
         }
-        public bool uploadToDirectory(string directory, string filename, byte [] data)
+        public bool uploadToDirectory(string directory, string filename, byte[] data)
         {
             //write the bytes of the file to the stream
-            FileStream fs = new FileStream(directory + filename, FileMode.Create);
-            BinaryWriter bw = new BinaryWriter(fs);
-            if (fs.CanWrite)
-                bw.Write(data, 0, data.Length);
-            else
-                return false;
-            return true;
+            try
+            {
+                FileStream fs = new FileStream(directory + filename, FileMode.Create);
+                BinaryWriter bw = new BinaryWriter(fs);
+
+                if (fs.CanWrite)
+                    bw.Write(data, 0, data.Length);
+                else
+                {
+                    bw.Dispose();
+                    fs.Dispose();
+                    return false;
+                }
+                    
+
+                bw.Flush();
+                fs.Flush();
+                fs.Dispose();
+                return true;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Data);
+            }
+            return false;
         }
         public long addFileToRedisSendQueue(string filename, string hash, string ip = "0.0.0.0")
         {
