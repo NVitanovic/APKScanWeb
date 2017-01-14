@@ -87,6 +87,9 @@ namespace APKScanWeb.Models
         }
         public bool uploadToDirectory(string directory, string filename, byte[] data)
         {
+            //check if data length is 0
+            if (data.Length == 0)
+                return false;
             //write the bytes of the file to the stream
             try
             {
@@ -97,11 +100,12 @@ namespace APKScanWeb.Models
                     bw.Write(data, 0, data.Length);
                 else
                 {
+                    bw.Flush();
+                    fs.Flush();
                     bw.Dispose();
                     fs.Dispose();
                     return false;
                 }
-
                 bw.Flush();
                 fs.Flush();
                 bw.Dispose();
