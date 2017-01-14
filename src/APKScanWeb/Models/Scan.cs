@@ -101,10 +101,10 @@ namespace APKScanWeb.Models
                     fs.Dispose();
                     return false;
                 }
-                    
 
                 bw.Flush();
                 fs.Flush();
+                bw.Dispose();
                 fs.Dispose();
                 return true;
             }

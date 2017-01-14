@@ -42,7 +42,7 @@ namespace APKScanWeb.Controllers
             var uploadedFile = Request.Form.Files["file"];
 
             //var uploadIp = Request.Headers["X-Forwarded-For"]; //not good should be different should check this when add HAProxy or Nginx in front
-            var uploadIp = Request.Host.Host; //TODO: returns localhost and probably SERVER host we need users IP
+            var uploadIp = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
             //check if the uploaded file is actually sent
             if (uploadedFile == null)
