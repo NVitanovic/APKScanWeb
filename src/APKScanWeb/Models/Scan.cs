@@ -9,6 +9,7 @@ using Cassandra.Mapping;
 using System.IO;
 using APKScanSharedClasses;
 using System.Threading;
+using StackExchange.Redis;
 
 namespace APKScanWeb.Models
 {
@@ -100,6 +101,7 @@ namespace APKScanWeb.Models
             //Result should not be used as it is not a proper object
             //ip is currently not used
             RedisSend obj = new RedisSend();
+            ISubscriber sub = dl.redisCluster.GetSubscriber();
 
             //form the object and add the data needed
             obj.filename = filename;
@@ -110,6 +112,8 @@ namespace APKScanWeb.Models
             //serialize the object and push it to the list
             string data = JsonConvert.SerializeObject(obj);
             long queueNumber = dl.redis.ListLeftPush("send", data);
+            //announce that the item was pushed to the list
+            sub.Publish("send", "api");
             return queueNumber;
         }
         public bool addScanResultToRedisCache(RedisReceive result)
