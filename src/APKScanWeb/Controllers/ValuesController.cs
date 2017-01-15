@@ -26,6 +26,7 @@ namespace APKScanWeb.Controllers
         [HttpGet]
         public string Get()
         {
+            VMControl ctrl = VMControl.getInstance("https://l11.nikos-hosting.com:8006/", "koma", "komicakomica", VMControl.eAuthMethods.pve);
             RedisReceive rc = new RedisReceive();
             rc.av_results.Add("AV1", "true");
             rc.av_results.Add("AV2", "false");
