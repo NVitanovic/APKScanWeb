@@ -30,7 +30,7 @@ namespace APKScanWeb.Controllers
             RedisProxmox data = new RedisProxmox();
             data.master_id = "Neki tamo master";
             data.auth = "sifra";
-            data.task = eTask.crateSnapshot;
+            data.task = eTask.createSnapshot;
             data.vm_id = "117";
 
             RedisReceive rc = new RedisReceive();

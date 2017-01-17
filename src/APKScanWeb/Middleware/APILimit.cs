@@ -21,11 +21,17 @@ namespace APKScanWeb.Middleware
 
         public Task Invoke(HttpContext httpContext)
         {
-            string userIp = httpContext.Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-            string userToken
+            string userIp = httpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            string userToken = httpContext.Request.Headers["Access-Token"];
+
+            //check if token contains only letters and numbers 
+            if (userToken != null && !userToken.All(char.IsLetterOrDigit))
+                httpContext.Response.StatusCode = 406; //not acceptable
+
             IMapper mapper = new Mapper(dl.cassandra);
             Access_Count accessCount = null;
             Access_Time accessTime = null;
+            Access_Tokens accessToken = null;
             //get data
             try
             {
@@ -44,7 +50,32 @@ namespace APKScanWeb.Middleware
                 //if there are more than specified number of requests for one hour
                 if (accessCount.hits > Program.config.maxhourlyrequests && (DateTime.UtcNow - accessTime.last_access) < TimeSpan.FromHours(1))
                 {
-                    httpContext.Abort();
+                    //httpContext.Abort();
+                    //check if you have access token and it's valid
+                    try
+                    {
+                        accessToken = mapper.Single<Access_Tokens>("SELECT * FROM access_tokens WHERE token_name = ?", userToken);
+                        
+                        //is token valid
+                        if (!accessToken.valid)
+                        {
+                            httpContext.Response.StatusCode = 403;
+                            httpContext.Response.Body.WriteByte(0);
+                        }
+                            //check if the client quota is out of range
+                        if (accessToken.quota < accessCount.hits)
+                        {
+                            //quota is over user limited forbidden
+                            httpContext.Response.StatusCode = 403;
+                            httpContext.Response.Body.WriteByte(0);
+                        }    
+                    }
+                    catch
+                    {
+                        //set unauthorized so the key is invalid and it's already out of quota
+                        httpContext.Response.StatusCode = 401;
+                        httpContext.Response.Body.WriteByte(0);
+                    }
                 }
             }
             //write data
