@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using APKScanWeb;
+using APKScanWeb.Models;
+using APKScanWeb.Models.Entities;
 using Cassandra;
 using Newtonsoft.Json;
 using Cassandra.Mapping;

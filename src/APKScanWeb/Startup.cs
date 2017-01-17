@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using APKScanWeb.Models;
 using Microsoft.Extensions.Options;
+using APKScanWeb.Middleware;
 
 namespace APKScanWeb
 {
@@ -49,7 +50,7 @@ namespace APKScanWeb
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            app.UseMiddleware<APILimit>();
             app.UseMvc();
         }
     }

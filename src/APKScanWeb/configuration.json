@@ -20,6 +20,7 @@
       ],
       "keyspace": "apkscan"
     },
-    "FileUploadPath": "D:\\xampp\\htdocs\\download\\"
+    "FileUploadPath": "D:\\xampp\\htdocs\\download\\",
+    "MaxHourlyRequests": 50
   }
 }

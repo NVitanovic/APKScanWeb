@@ -9,5 +9,6 @@ namespace APKScanWeb.Models
     public class Configuration : SharedConfiguration
     {
         public string fileuploadpath { get; set; }
+        public int maxhourlyrequests { get; set; }
     }
 }

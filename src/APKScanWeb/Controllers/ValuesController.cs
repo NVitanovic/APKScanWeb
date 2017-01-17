@@ -26,7 +26,13 @@ namespace APKScanWeb.Controllers
         [HttpGet]
         public string Get()
         {
-            VMControl ctrl = VMControl.getInstance("https://l11.nikos-hosting.com:8006/", "koma", "komicakomica", VMControl.eAuthMethods.pve);
+            //VMControl ctrl = VMControl.getInstance("https://l11.nikos-hosting.com:8006/", "koma", "komicakomica", VMControl.eAuthMethods.pve);
+            RedisProxmox data = new RedisProxmox();
+            data.master_id = "Neki tamo master";
+            data.auth = "sifra";
+            data.task = eTask.crateSnapshot;
+            data.vm_id = "117";
+
             RedisReceive rc = new RedisReceive();
             rc.av_results.Add("AV1", "true");
             rc.av_results.Add("AV2", "false");
@@ -35,7 +41,7 @@ namespace APKScanWeb.Controllers
             rc.hash = "a5e9112cff236c1410016bae68e05d86";
             rc.master_id = "master1";
 
-            return JsonConvert.SerializeObject(rc); //Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
+            return JsonConvert.SerializeObject(data); //Program.config.cassandra.keyspace, config.cassandra.servers[0], Helpers.TestLatencyRedis(), Helpers.TestCassandra() };
         }
         // GET api/values/send/{val}
         [HttpGet("send/{val}")]
