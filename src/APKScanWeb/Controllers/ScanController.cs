@@ -43,7 +43,7 @@ namespace APKScanWeb.Controllers
             if(uploadedFile.Length > config.maxfilesize*1024*1024)
                 return await Task.FromResult<JsonResult>(Json(new { error = "File size is greater than allowed!" }));
 
-            //var uploadIp = Request.Headers["X-Forwarded-For"]; //not good should be different should check this when add HAProxy or Nginx in front
+            //get the uploader IP
             var uploadIp = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
             //check if the uploaded file is actually sent

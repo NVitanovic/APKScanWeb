@@ -50,6 +50,7 @@ namespace APKScanWeb
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            app.UseMiddleware<RealIP>();
             app.UseMiddleware<APILimit>();
             app.UseMvc();
         }
