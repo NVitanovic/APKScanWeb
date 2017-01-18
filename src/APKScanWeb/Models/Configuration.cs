@@ -10,5 +10,6 @@ namespace APKScanWeb.Models
     {
         public string fileuploadpath { get; set; }
         public int maxhourlyrequests { get; set; }
+        public int maxfilesize { get; set; }
     }
 }

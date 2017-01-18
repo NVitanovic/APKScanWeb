@@ -36,17 +36,19 @@ namespace APKScanWeb.Controllers
         [HttpPost]
         public async Task<JsonResult> Post()
         {
-            var error = new { error = "Error while uploading the file!" };
-
             //get the "file" from the body
             var uploadedFile = Request.Form.Files["file"];
+
+            //check the filesize if it's over maximum
+            if(uploadedFile.Length > config.maxfilesize*1024*1024)
+                return await Task.FromResult<JsonResult>(Json(new { error = "File size is greater than allowed!" }));
 
             //var uploadIp = Request.Headers["X-Forwarded-For"]; //not good should be different should check this when add HAProxy or Nginx in front
             var uploadIp = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
             //check if the uploaded file is actually sent
             if (uploadedFile == null)
-                return await Task.FromResult<JsonResult>(Json(error));
+                return await Task.FromResult<JsonResult>(Json(new { error = "Error while uploading the file!" }));
             //throw new Exception("Error while uploading the file NULL!");
 
             //now lets read the file data
@@ -56,7 +58,7 @@ namespace APKScanWeb.Controllers
             //generate md5 hash and write the file to the specific directory
             var md5 = Helpers.GetMD5HashFromBytes(fileData);
             if(!scanModel.uploadToDirectory(config.fileuploadpath, md5, fileData))
-                return await Task.FromResult<JsonResult>(Json(error));
+                return await Task.FromResult<JsonResult>(Json(new { error = "Can't write to the download directory!" }));
 
             //put the file to the redis queue
             var num = scanModel.addFileToRedisSendQueue(uploadedFile.FileName, md5, uploadIp);

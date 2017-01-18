@@ -142,14 +142,6 @@ namespace APKScanWeb.Models
         }
         public bool addScanResultToRedisCache(RedisReceive result)
         {
-            /*Result r = new Result();
-            r.hash = result.hash;
-            r.av = result.av_results;
-            r.filename.Add(result.filename);
-            r.hits = 0;
-            //if upload ip is null
-            r.upload_ip.Add( (result.upload_ip == null)?"0.0.0.0": result.upload_ip);
-            */
             addScanResultToRedisCache(getScanResultFromCassandra(result.hash));
 
             return true;
