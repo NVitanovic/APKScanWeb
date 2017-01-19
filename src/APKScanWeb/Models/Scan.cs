@@ -17,8 +17,7 @@ namespace APKScanWeb.Models
 {
     public class Scan
     {
-        private static bool isBGTaskRunning = false;
-        DataLayer dl;
+        private DataLayer dl;
         public Scan()
         {
             try

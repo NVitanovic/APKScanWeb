@@ -17,6 +17,12 @@ namespace APKScanWeb.Controllers
         public ScanController(IOptions<Configuration> settings) : base(settings)
         {}
         //-------------------------------------------------------------------------------------------------------------------------------
+        [HttpGet("redirect")]
+        public void RedirectToWebsite()
+        {
+            this.Response.Redirect("http://www.apkscan.online/");
+        }
+        //-------------------------------------------------------------------------------------------------------------------------------
         [HttpGet("{hash}")]
         public JsonResult Get(string hash)
         {

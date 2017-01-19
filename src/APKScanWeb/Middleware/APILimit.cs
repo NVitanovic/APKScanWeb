@@ -8,7 +8,6 @@ using Cassandra.Mapping;
 using APKScanWeb.Models.Entities;
 namespace APKScanWeb.Middleware
 {
-    // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class APILimit
     {
         private readonly RequestDelegate _next;
@@ -32,12 +31,12 @@ namespace APKScanWeb.Middleware
             Access_Count accessCount = null;
             Access_Time accessTime = null;
             Access_Tokens accessToken = null;
+
             //get data
             try
             {
                  accessCount = mapper.Single<Access_Count>("SELECT * FROM access_count WHERE ip = ?", userIp);
                  accessTime  = mapper.Single<Access_Time>("SELECT * FROM access_time WHERE ip = ?", userIp);
-                //Access_Tokens accessToken = mapper.Single<Access_Tokens>("SELECT * FROM access_tokens WHERE token", userIp);
             }
             catch
             {
@@ -78,12 +77,14 @@ namespace APKScanWeb.Middleware
                     }
                 }
             }
+
             //write data
             var statementCount = dl.cassandra.Prepare("UPDATE access_count SET hits = hits + 1 WHERE ip = ?").Bind(userIp);
             var statementTime = dl.cassandra.Prepare("UPDATE access_time SET last_access = toTimestamp(now()) WHERE ip = ?").Bind(userIp);
 
             dl.cassandra.Execute(statementCount);
             dl.cassandra.Execute(statementTime);
+
             return _next(httpContext);
         }
     }
