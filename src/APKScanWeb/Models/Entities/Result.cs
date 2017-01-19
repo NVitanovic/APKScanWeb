@@ -7,6 +7,7 @@ namespace APKScanWeb.Models.Entities
 {
     public class Result : ScanResult
     {
-
+        public DateTime last_scan { get; set; }
+        public DateTime first_scan { get; set; }
     }
 }

@@ -62,7 +62,7 @@ namespace APKScanWeb.Models
             if (existsInCassandra(hash))
             {
                 IMapper mapper = new Mapper(dl.cassandra);
-                Result result = mapper.Single<Result>("SELECT hash,filename,av,upload_ip FROM files WHERE hash = ?", hash);
+                Result result = mapper.Single<Result>("SELECT hash,filename,av,upload_ip,last_scan,first_scan FROM files WHERE hash = ?", hash);
 
                 return result;
             }
@@ -173,7 +173,10 @@ namespace APKScanWeb.Models
             //get the existing result
             var existingResult = getScanResultFromCassandra(result.hash);
 
-            if(existingResult != null)
+            PreparedStatement query = null;
+            BoundStatement statement = null;
+
+            if (existingResult != null)
             {
                 //for every existing ip check if it matches the new ip if it does not then just add it to the existing pile
                 for(int i = 0; i < existingResult.upload_ip.Count; i++)
@@ -203,11 +206,14 @@ namespace APKScanWeb.Models
                     if(!av.ContainsKey(x.Key))
                         av.Add(x.Key, x.Value);
                 }
+                //add when there is existing data
+                query = dl.cassandra.Prepare("UPDATE files SET filename = ?, upload_ip = ?, av = ?, last_scan = toTimestamp(now()) WHERE hash = ?");
             }
-
-            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, av) VALUES(?, ?, ?, ?);");
-
-            var statement = query.Bind(result.hash, filename, upload_ip, av);
+            else //no data existing add first_scan also
+                query = dl.cassandra.Prepare("UPDATE files SET filename = ?, upload_ip = ?, av = ?, last_scan = toTimestamp(now()), first_scan = toTimestamp(now()) WHERE hash = ?");
+            
+            //run the query
+            statement = query.Bind(filename, upload_ip, av, result.hash);
             statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var res = dl.cassandra.Execute(statement);
 
