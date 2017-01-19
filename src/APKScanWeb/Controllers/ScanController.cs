@@ -20,14 +20,17 @@ namespace APKScanWeb.Controllers
         [HttpGet("{hash}")]
         public JsonResult Get(string hash)
         {
-            var error =  new { error = "Invalid md5 hash!" };
-
             //check the validity of the md5 hash
             if (!hash.All(char.IsLetterOrDigit))
-                return Json(error);
+                return Json(new { error = "Invalid md5 hash!" });
 
             //get the scan result
             var result = scanModel.getScanResult(hash);
+
+            //check the if the file result is in the DB
+            if (result == null)
+                return Json(new { error = "File not found!" });
+
             return Json(result);
         }
         //-------------------------------------------------------------------------------------------------------------------------------
