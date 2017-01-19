@@ -62,7 +62,8 @@ namespace APKScanWeb.Models
             if (existsInCassandra(hash))
             {
                 IMapper mapper = new Mapper(dl.cassandra);
-                Result result = mapper.Single<Result>("SELECT hash,filename,hits,av,upload_ip FROM files WHERE hash = ?", hash);
+                Result result = mapper.Single<Result>("SELECT hash,filename,av,upload_ip FROM files WHERE hash = ?", hash);
+
                 return result;
             }
             return null;
@@ -70,7 +71,7 @@ namespace APKScanWeb.Models
         public Result getScanResult(string hash)
         {
             //first check redis cache for data
-            var redisResult = getScanResultFromRedisCache(hash);
+            Result redisResult = getScanResultFromRedisCache(hash);
             if (redisResult != null)
                 return redisResult; 
 
@@ -142,8 +143,8 @@ namespace APKScanWeb.Models
         }
         public bool addScanResultToRedisCache(RedisReceive result)
         {
-            addScanResultToRedisCache(getScanResultFromCassandra(result.hash));
-
+            if (!addScanResultToRedisCache(getScanResultFromCassandra(result.hash)))
+                return false;
             return true;
         }
         public bool addScanResultToRedisCache(Result result)
@@ -167,7 +168,6 @@ namespace APKScanWeb.Models
             upload_ip.Add(result.upload_ip == null ? "0.0.0.0" : result.upload_ip);
             List<string> filename = new List<string>();
             filename.Add(result.filename);
-            int hits = 0;
             Dictionary<string, string> av = new Dictionary<string, string>(result.av_results);
 
             //get the existing result
@@ -196,9 +196,6 @@ namespace APKScanWeb.Models
                     filename.Add(existingResult.filename[i]);
                 }
 
-                //set the hits value to the same one
-                hits = existingResult.hits;
-
                 //now the av check
                 foreach(var x in existingResult.av)
                 {
@@ -208,9 +205,9 @@ namespace APKScanWeb.Models
                 }
             }
 
-            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, hits, upload_ip, av) VALUES(?, ?, ?, ?, ?);");
+            var query = dl.cassandra.Prepare("INSERT INTO files (hash, filename, upload_ip, av) VALUES(?, ?, ?, ?);");
 
-            var statement = query.Bind(result.hash, filename, hits, upload_ip, av);
+            var statement = query.Bind(result.hash, filename, upload_ip, av);
             statement.SetConsistencyLevel(ConsistencyLevel.Quorum);
             var res = dl.cassandra.Execute(statement);
 
