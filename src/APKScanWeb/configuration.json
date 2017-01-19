@@ -22,6 +22,6 @@
     },
     "FileUploadPath": "D:\\xampp\\htdocs\\download\\",
     "MaxHourlyRequests": 999,
-    "MaxFileSize": 1
+    "MaxFileSize": 200
   }
 }
