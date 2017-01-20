@@ -19,7 +19,7 @@ namespace APKScanWeb.Middleware
         {
             try
             {
-                httpContext.Request.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse(httpContext.Request.Headers["X-Forwarded-For"]);
+                httpContext.Request.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse(httpContext.Request.Headers["X-Real-IP"]);
             }
             catch { }
             return _next(httpContext);
