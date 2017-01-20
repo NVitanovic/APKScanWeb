@@ -37,6 +37,9 @@ namespace APKScanWeb.Controllers
             if (result == null)
                 return Json(new { error = "File not found!" });
 
+            //allow access from any server
+            Response.Headers["Access-Control-Allow-Origin"] = "*";
+
             return Json(result);
         }
         //-------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +74,9 @@ namespace APKScanWeb.Controllers
 
             //put the file to the redis queue
             var num = scanModel.addFileToRedisSendQueue(uploadedFile.FileName, md5, uploadIp);
+
+            //allow access from any server
+            Response.Headers["Access-Control-Allow-Origin"] = "*";
 
             //show the result and queue number
             return await Task.FromResult<JsonResult>(Json(new { success = "File uploaded successfully!", queue = num, hash = md5 }));
