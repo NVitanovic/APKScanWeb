@@ -79,10 +79,13 @@ namespace APKScanWeb.Middleware
                         }
                     }
                 }
-                else //clear the access count if time has passed
+                else //clear the access count if time has passed and update the access_time
                 {
-                    var statementClear = dl.cassandra.Prepare("DELETE FROM access_count WHERE ip = ?").Bind(userIp);
+                    var statementClear = dl.cassandra.Prepare("UPDATE access_count SET hits = hits - ? WHERE ip = ?").Bind(Convert.ToInt64(accessCount.hits), userIp);
+                    var statementTime2 = dl.cassandra.Prepare("UPDATE access_time SET last_access = toTimestamp(now()) WHERE ip = ?").Bind(userIp);
+                    dl.cassandra.Execute(statementTime2);
                     dl.cassandra.Execute(statementClear);
+                    return _next(httpContext);
                 }
             }
             
