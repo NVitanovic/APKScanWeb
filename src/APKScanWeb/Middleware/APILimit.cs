@@ -47,35 +47,43 @@ namespace APKScanWeb.Middleware
             if(accessCount != null && accessTime != null)
             {
                 //if there are more than specified number of requests for one hour
-                if (accessCount.hits > Program.config.maxhourlyrequests && (DateTime.UtcNow - accessTime.last_access) < TimeSpan.FromHours(1))
+                if((DateTime.UtcNow - accessTime.last_access) < TimeSpan.FromHours(1))
                 {
-                    //httpContext.Abort();
-                    //check if you have access token and it's valid
-                    try
+                    if (accessCount.hits > Program.config.maxhourlyrequests)
                     {
-                        accessToken = mapper.Single<Access_Tokens>("SELECT * FROM access_tokens WHERE token_name = ?", userToken);
-                        
-                        //is token valid
-                        if (!accessToken.valid)
+                        //httpContext.Abort();
+                        //check if you have access token and it's valid
+                        try
                         {
-                            httpContext.Response.StatusCode = 403;
+                            accessToken = mapper.Single<Access_Tokens>("SELECT * FROM access_tokens WHERE token_name = ?", userToken);
+
+                            //is token valid
+                            if (!accessToken.valid)
+                            {
+                                httpContext.Response.StatusCode = 403;
+                                httpContext.Response.Body.WriteByte(0);
+                            }
+                            //check if the client quota is out of range
+                            if (accessToken.quota < accessCount.hits)
+                            {
+                                //quota is over user limited forbidden
+                                httpContext.Response.StatusCode = 403;
+                                httpContext.Response.Body.WriteByte(0);
+                            }
+                        }
+                        catch
+                        {
+                            //set unauthorized so the key is invalid and it's already out of quota
+                            httpContext.Response.StatusCode = 401;
                             httpContext.Response.Body.WriteByte(0);
                         }
-                            //check if the client quota is out of range
-                        if (accessToken.quota < accessCount.hits)
-                        {
-                            //quota is over user limited forbidden
-                            httpContext.Response.StatusCode = 403;
-                            httpContext.Response.Body.WriteByte(0);
-                        }    
-                    }
-                    catch
-                    {
-                        //set unauthorized so the key is invalid and it's already out of quota
-                        httpContext.Response.StatusCode = 401;
-                        httpContext.Response.Body.WriteByte(0);
                     }
                 }
+            }
+            else //clear the access count if time has passed
+            {
+                var statementClear = dl.cassandra.Prepare("UPDATE access_count SET hits = 0 WHERE ip = ?").Bind(userIp);
+                dl.cassandra.Execute(statementClear);
             }
 
             //write data
