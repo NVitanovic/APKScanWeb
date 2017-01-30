@@ -79,12 +79,13 @@ namespace APKScanWeb.Middleware
                         }
                     }
                 }
+                else //clear the access count if time has passed
+                {
+                    var statementClear = dl.cassandra.Prepare("DELETE FROM access_count WHERE ip = ?").Bind(userIp);
+                    dl.cassandra.Execute(statementClear);
+                }
             }
-            else //clear the access count if time has passed
-            {
-                var statementClear = dl.cassandra.Prepare("DELETE FROM access_count WHERE ip = ?").Bind(userIp);
-                dl.cassandra.Execute(statementClear);
-            }
+            
 
             //write data
             var statementCount = dl.cassandra.Prepare("UPDATE access_count SET hits = hits + 1 WHERE ip = ?").Bind(userIp);
