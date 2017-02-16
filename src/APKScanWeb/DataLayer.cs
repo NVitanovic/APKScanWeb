@@ -6,6 +6,7 @@ using Cassandra;
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration.Json;
 using Newtonsoft.Json;
+using MongoDB.Driver;
 
 namespace APKScanWeb
 {
@@ -15,8 +16,11 @@ namespace APKScanWeb
         public ISession cassandra = null;
         public ConnectionMultiplexer redisCluster = null;
         public IDatabase redis = null;
+        public MongoClient mongoCluster = null;
+        public IMongoDatabase mongo = null;
         public static DataLayer singleton = null;
         private static object  lockObj = new object();
+
         public static DataLayer getInstance()
         {
             if (singleton == null)
@@ -64,6 +68,19 @@ namespace APKScanWeb
 
                 //privremeno pokrecemo testSubscribe
                 //testSubscribe();
+            }
+            
+            if(mongoCluster == null)
+            {
+                string mongoConfig = "mongodb://";
+                for (int i = 0; i < config.mongo.servers.Count; i++)
+                    if (i == config.mongo.servers.Count - 1)
+                        mongoConfig += config.mongo.servers[i];
+                    else
+                        mongoConfig += config.mongo.servers[i] + ",";
+                mongoConfig += "/?replicaSet=" + config.mongo.replicaset;
+                mongoCluster = new MongoClient(mongoConfig);
+                mongo = mongoCluster.GetDatabase(config.mongo.database);
             }
         }
         /*public void testSubscribe()

@@ -18,7 +18,8 @@
     "StackExchange.Redis": "1.1.608",
     "CassandraCSharpDriver": "3.2.0",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.1",
-    "APKScanSharedClasses": "1.0.0-*"
+    "APKScanSharedClasses": "1.0.0-*",
+    "MongoDB.Driver": "2.4.2"
   },
 
   "tools": {

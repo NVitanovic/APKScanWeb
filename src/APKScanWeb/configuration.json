@@ -20,6 +20,15 @@
       ],
       "keyspace": "apkscan"
     },
+    "Mongo": {
+      "servers": [
+        "mongo1.apkscan.online:27017",
+        "mongo2.apkscan.online:27017",
+        "mongo3.apkscan.online:27017"
+      ],
+      "database": "apkscan",
+      "replicaset": "apkscan"
+    },
     "FileUploadPath": "D:\\xampp\\htdocs\\download\\",
     "MaxHourlyRequests": 999,
     "MaxFileSize": 200
