@@ -21,15 +21,19 @@ namespace APKScanWeb.Models
                 throw new Exception("Error while getting DataLayer instance!");
             }
         }
-        private bool addToCollection(string data, string collection)
+        private bool addToCollection(string data, string collection, string ip)
         {
             if (String.IsNullOrEmpty(data))
                 return false;
 
+            if (String.IsNullOrEmpty(ip))
+                ip = "0.0.0.0";
+
             try
             {
                 var bsonDoc = MongoDB.Bson.Serialization.BsonSerializer.Deserialize<BsonDocument>(data);
-                bsonDoc.Add("created_at", DateTime.UtcNow);
+                bsonDoc.Set("created_at", DateTime.UtcNow);
+                bsonDoc.Set("upload_ip", ip);
                 var mongoCol = dl.mongo.GetCollection<BsonDocument>(collection);
                 mongoCol.InsertOne(bsonDoc);
             }
@@ -40,13 +44,13 @@ namespace APKScanWeb.Models
    
             return true;
         }
-        public bool addToScanCollection(string data)
+        public bool addToScanCollection(string data, string ip = "0.0.0.0")
         {
-            return addToCollection(data, "scan");
+            return addToCollection(data, "scan", ip);
         }
-        public bool addToResultCollection(string data)
+        public bool addToResultCollection(string data, string ip = "0.0.0.0")
         {
-            return addToCollection(data, "result");
+            return addToCollection(data, "result", ip);
         }
     }
 }

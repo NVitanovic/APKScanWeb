@@ -18,11 +18,16 @@ namespace APKScanWeb.Controllers
         }
         private JsonResult addToCollection(string collection)
         {
+            var userIp = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
             var stream = Request.Body;
             StreamReader reader = new StreamReader(stream);
             string data = reader.ReadToEnd();
-            if (!statsModel.addToScanCollection(data))
+
+            if (collection == "scan" && !statsModel.addToScanCollection(data,userIp))
                 return Json(new { success = false });
+            else if (collection == "result" && !statsModel.addToResultCollection(data,userIp))
+                return Json(new { success = false });
+
             return Json(new { success = true });
         }
         [HttpPost("scan")]
