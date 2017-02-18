@@ -29,7 +29,8 @@ namespace APKScanWeb.Models
             try
             {
                 var bsonDoc = MongoDB.Bson.Serialization.BsonSerializer.Deserialize<BsonDocument>(data);
-                var mongoCol = dl.mongo.GetCollection<BsonDocument>("scan");
+                bsonDoc.Add("created_at", DateTime.UtcNow);
+                var mongoCol = dl.mongo.GetCollection<BsonDocument>(collection);
                 mongoCol.InsertOne(bsonDoc);
             }
             catch
