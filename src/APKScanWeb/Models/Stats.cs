@@ -136,7 +136,7 @@ namespace APKScanWeb.Models
 
             var totalScansJson = analyticsTotalScans();
 
-            var totalFileSizeJson = analyticsTotalFileSize() / 1024 * 1024; //MegaBytes
+            var totalFileSizeJson = analyticsTotalFileSize() / (1024 * 1024); //MegaBytes
 
             return new JsonResult(new {
                 scans = totalScansJson,
@@ -254,10 +254,10 @@ namespace APKScanWeb.Models
         {
             BsonDocument x = new BsonDocument();
             var collection = dl.mongo.GetCollection<BsonDocument>("scan");
-            x.Add("<1MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 1024 * 1024)).ToList().Count());
-            x.Add("<10MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 10 * 1024 * 1024)).ToList().Count());
-            x.Add("<50MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 50 * 1024 * 1024)).ToList().Count());
-            x.Add(">50MB", collection.Find(Builders<BsonDocument>.Filter.Gte("file.size", 50 * 1024 * 1024)).ToList().Count());
+            x.Add("<1MB", collection.Find(Builders<BsonDocument>.Filter.Lte("file.size", 1024 * 1024)).ToList().Count());
+            x.Add("<10MB", collection.Find(Builders<BsonDocument>.Filter.Gt("file.size", 1024 * 1024) & Builders<BsonDocument>.Filter.Lte("file.size", 10 * 1024 * 1024)).ToList().Count());
+            x.Add("<50MB", collection.Find(Builders<BsonDocument>.Filter.Gt("file.size", 10 * 1024 * 1024) & Builders<BsonDocument>.Filter.Lte("file.size", 50 * 1024 * 1024)).ToList().Count());
+            x.Add(">50MB", collection.Find(Builders<BsonDocument>.Filter.Gt("file.size", 50 * 1024 * 1024)).ToList().Count());
             return x;
         }
     }
