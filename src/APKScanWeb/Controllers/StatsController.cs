@@ -12,9 +12,9 @@ namespace APKScanWeb.Controllers
     public class StatsController : Controller
     {
         private Stats statsModel = new Stats();
-        public String Index()
+        public JsonResult Index()
         {
-            return "";
+            return statsModel.getStats();
         }
         private JsonResult addToCollection(string collection)
         {
