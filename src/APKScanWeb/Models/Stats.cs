@@ -121,16 +121,12 @@ namespace APKScanWeb.Models
             BsonDocument fileTypesJson = new BsonDocument();
             foreach (var item in fileTypes)
             {
-                String key;
-
-                if (item["_id"].BsonType != BsonType.Null)
-                    key = item["_id"].ToString();
-                else
-                    key = "desktop";
-
+                var key = item["_id"].ToString();
                 var val = item["count"].ToString();
                 fileTypesJson.Add(key, val);
             }
+
+            var fileSizesJson = analyticsFileSize();
 
             var scansJson = weeklyScans();
 
@@ -140,16 +136,20 @@ namespace APKScanWeb.Models
 
             var totalScansJson = analyticsTotalScans();
 
+            var totalFileSizeJson = analyticsTotalFileSize() / 1024 * 1024; //MegaBytes
+
             return new JsonResult(new {
                 scans = totalScansJson,
                 uploads = totalUploadsJson,
                 detections = totalDetectionsJson,
+                totalfilesize = totalFileSizeJson,
                 weekscans = scansJson.ToDictionary(),
                 countries = countriesJson.ToDictionary(),
                 os = osJson.ToDictionary(),
                 browser = browserJson.ToDictionary(),
                 device = deviceJson.ToDictionary(),
-                filetypes = fileTypesJson.ToDictionary()
+                filetypes = fileTypesJson.ToDictionary(),
+                filesizes = fileSizesJson.ToDictionary()
                 
             });
         }
@@ -241,6 +241,24 @@ namespace APKScanWeb.Models
             .Group(new BsonDocument { { "_id", 0 }, { "count", new BsonDocument("$sum", 1) } });
 
             return aggregate.ToList()[0]["count"].ToInt32();
+        }
+        private int analyticsTotalFileSize()
+        {
+            var collection = dl.mongo.GetCollection<BsonDocument>("scan");
+            var aggregate = collection.Aggregate()
+            .Group(new BsonDocument { { "_id", 0 }, { "count", new BsonDocument("$sum", "$file.size") } });
+
+            return aggregate.ToList()[0]["count"].ToInt32();
+        }
+        private BsonDocument analyticsFileSize()
+        {
+            BsonDocument x = new BsonDocument();
+            var collection = dl.mongo.GetCollection<BsonDocument>("scan");
+            x.Add("<1MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 1024 * 1024)).ToList().Count());
+            x.Add("<10MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 10 * 1024 * 1024)).ToList().Count());
+            x.Add("<50MB", collection.Find(Builders<BsonDocument>.Filter.Lt("file.size", 50 * 1024 * 1024)).ToList().Count());
+            x.Add(">50MB", collection.Find(Builders<BsonDocument>.Filter.Gte("file.size", 50 * 1024 * 1024)).ToList().Count());
+            return x;
         }
     }
 }
