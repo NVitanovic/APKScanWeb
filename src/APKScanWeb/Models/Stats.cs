@@ -6,6 +6,8 @@ using MongoDB;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace APKScanWeb.Models
 {
@@ -56,8 +58,17 @@ namespace APKScanWeb.Models
         }
         public JsonResult getStats()
         {
-            //TODO: Check if there is data in Redis if not get from Mongo and Save in Redis and return data....
-            return getStatsFromMongo();
+            var cache = dl.redis.StringGet("stats:cache");
+            if (cache.IsNullOrEmpty) //no data in Redis update it and return current data
+            { 
+                var mongoStats = getStatsFromMongo();
+                dl.redis.StringSet("stats:cache", mongoStats.Value.ToJson());
+                dl.redis.KeyExpire("stats:cache", TimeSpan.FromDays(1));
+                return mongoStats;
+            }
+
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(cache);
+            return new JsonResult(result);
         }
         private JsonResult getStatsFromMongo()
         {
@@ -198,41 +209,38 @@ namespace APKScanWeb.Models
             return x;
         }
 
-        private long analyticsPerDay(DateTime theDay, IMongoCollection<BsonDocument> collection, int day)
+        private int analyticsPerDay(DateTime theDay, IMongoCollection<BsonDocument> collection, int day)
         {
-            //privremeno, treba za dane kada se prodje vreme, trenutno je za sate
-            //var filter = Builders<BsonDocument>.Filter.Lte(new StringFieldDefinition<BsonDocument, BsonDateTime>("created_at"), new BsonDateTime(theDay.AddDays(day))) &
-            //Builders<BsonDocument>.Filter.Gte(new StringFieldDefinition<BsonDocument, BsonDateTime>("created_at"), new BsonDateTime(theDay.AddDays(day - 1)));
             var filter = Builders<BsonDocument>.Filter.Lte(new StringFieldDefinition<BsonDocument, BsonDateTime>("created_at"), new BsonDateTime(theDay.AddDays(day))) &
                          Builders<BsonDocument>.Filter.Gte(new StringFieldDefinition<BsonDocument, BsonDateTime>("created_at"), new BsonDateTime(theDay.AddDays(day - 1)));
-            return collection.Find(filter).Count();
+            return Convert.ToInt32(collection.Find(filter).Count());
         }
 
-        private long analyticsTotalUniqueFilesSubmitted()
+        private int analyticsTotalUniqueFilesSubmitted()
         {
             var collection = dl.mongo.GetCollection<BsonDocument>("scan");
             var aggregate = collection.Aggregate()
                 .Group(new BsonDocument { { "_id", "$file.MD5hash" }, { "count", new BsonDocument("$sum", 1) } });
-            long results = aggregate.ToList().Count();
+            int results = aggregate.ToList().Count();
             return results;
         }
 
-        private long analyticsTotalDetections()
+        private int analyticsTotalDetections()
         {
             var collection = dl.mongo.GetCollection<BsonDocument>("result");
             var aggregate = collection.Aggregate()
             .Group(new BsonDocument { { "_id", 0 }, { "count", new BsonDocument("$sum", "$file.detections") } });
 
-            return aggregate.ToList()[0]["count"].ToInt64();
+            return aggregate.ToList()[0]["count"].ToInt32();
         }
         
-        private long analyticsTotalScans()
+        private int analyticsTotalScans()
         {
             var collection = dl.mongo.GetCollection<BsonDocument>("result");
             var aggregate = collection.Aggregate()
             .Group(new BsonDocument { { "_id", 0 }, { "count", new BsonDocument("$sum", 1) } });
 
-            return aggregate.ToList()[0]["count"].ToInt64();
+            return aggregate.ToList()[0]["count"].ToInt32();
         }
     }
 }
