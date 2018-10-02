@@ -7,6 +7,8 @@ using StackExchange.Redis;
 using Microsoft.Extensions.Configuration.Json;
 using Newtonsoft.Json;
 using MongoDB.Driver;
+using MySql.Data;
+using MySql.Data.MySqlClient;
 
 namespace APKScanWeb
 {
@@ -21,6 +23,8 @@ namespace APKScanWeb
         public static DataLayer singleton = null;
         private static object  lockObj = new object();
 
+        public MySqlConnection mysql = null;
+        
         public static DataLayer getInstance()
         {
             if (singleton == null)
@@ -38,7 +42,16 @@ namespace APKScanWeb
         }
         private DataLayer(Models.Configuration config)
         {
-            if(cassandraCluster == null)
+            if (mysql == null)
+            {
+                //string sql = String.Format("server={0};user={1};database={2};password={3};", config.mysql.hostname, config.mysql.username, config.mysql.database, config.mysql.password);
+                string sql = "server=127.0.0.1;user=root;database=apkscan;port=3306;password=;SslMode=none;";
+                mysql = new MySqlConnection(sql);
+                if (mysql.State == System.Data.ConnectionState.Closed)
+                        mysql.Open();
+            }
+
+            /*if (cassandraCluster == null)
             {
                 cassandraCluster = Cluster.Builder()
                                    .AddContactPoints(config.cassandra.servers.ToArray())
@@ -46,9 +59,9 @@ namespace APKScanWeb
 
                 if (cassandra == null) //inicijalizacija sesije
                     cassandra = cassandraCluster.Connect(config.cassandra.keyspace);
-            }
+            }*/
 
-            if(redisCluster == null)
+            /*if(redisCluster == null)
             {
                 string redisConfig = "";
 
@@ -68,9 +81,9 @@ namespace APKScanWeb
 
                 //privremeno pokrecemo testSubscribe
                 //testSubscribe();
-            }
+            }*/
             
-            if(mongoCluster == null)
+            /*if(mongoCluster == null)
             {
                 string mongoConfig = "mongodb://";
                 for (int i = 0; i < config.mongo.servers.Count; i++)
@@ -81,7 +94,9 @@ namespace APKScanWeb
                 mongoConfig += "/?replicaSet=" + config.mongo.replicaset;
                 mongoCluster = new MongoClient(mongoConfig);
                 mongo = mongoCluster.GetDatabase(config.mongo.database);
-            }
+            }*/
+
+            
         }
         /*public void testSubscribe()
         {

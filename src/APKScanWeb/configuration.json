@@ -20,6 +20,13 @@
       ],
       "keyspace": "apkscan"
     },
+    "MySQL": {
+      "hostname": "localhost",
+      "database": "apkscan",
+      "username": "root",
+      "password": "",
+      "otheropt": ""
+    },
     "Mongo": {
       "servers": [
         "mongo1.apkscan.online:27017",

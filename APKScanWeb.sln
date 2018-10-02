@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{56F0CCA2-705D-48B3-99F2-2ED569A239FB}"
 EndProject
@@ -10,9 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "APKScanWeb", "src\APKScanWeb\APKScanWeb.xproj", "{BA16B050-6FEA-4E2C-8AD3-95BD61FC098B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APKScanWeb", "src\APKScanWeb\APKScanWeb.csproj", "{BA16B050-6FEA-4E2C-8AD3-95BD61FC098B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "APKScanSharedClasses", "..\APKScanSharedClasses\src\APKScanSharedClasses\APKScanSharedClasses.xproj", "{C81FCD00-11EA-4D79-858C-DDB1744E9C0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APKScanSharedClasses", "..\APKScanSharedClasses\src\APKScanSharedClasses\APKScanSharedClasses.csproj", "{C81FCD00-11EA-4D79-858C-DDB1744E9C0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,5 +34,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BA16B050-6FEA-4E2C-8AD3-95BD61FC098B} = {56F0CCA2-705D-48B3-99F2-2ED569A239FB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {672AD1A1-F35F-432B-B2FA-9AD9697D413B}
 	EndGlobalSection
 EndGlobal

@@ -12,7 +12,8 @@ using System.IO;
 using APKScanSharedClasses;
 using System.Threading;
 using StackExchange.Redis;
-
+using MySql.Data;
+using MySql.Data.MySqlClient;
 namespace APKScanWeb.Models
 {
     public class Scan
@@ -46,6 +47,52 @@ namespace APKScanWeb.Models
             if (val == 0) //first row
                 return false;
             return true;
+        }
+        public Result getScanResultFromMySQL(string hash)
+        {
+            List<string> filenames = new List<string>();
+            List<string> upload_ip = new List<string>();
+            Dictionary<string, string> av = new Dictionary<string, string>();
+            DateTime last_scan = DateTime.Now;
+            DateTime first_scan = DateTime.Now;
+            //Get the list of filenames
+            MySqlCommand cmdScan = new MySqlCommand("SELECT * FROM scans WHERE hash = @hash ORDER BY created_at DESC", dl.mysql);
+            cmdScan.Parameters.AddWithValue("@hash", hash);
+            MySqlDataReader row = cmdScan.ExecuteReader();
+            if (row.HasRows)
+            {
+                while (row.Read())
+                {
+                    filenames.Add(row["filename"].ToString());
+                    upload_ip.Add(row["ip"].ToString());
+                    first_scan = Convert.ToDateTime(row["created_at"]);
+                }
+            }
+            row.Close();
+
+            //Get the list of AVScans
+            MySqlCommand cmdAV = new MySqlCommand("SELECT * FROM av_results WHERE hash = @hash ORDER BY created_at ASC", dl.mysql);
+            cmdAV.Parameters.AddWithValue("@hash", hash);
+            row = cmdAV.ExecuteReader();
+            if (row.HasRows)
+            { 
+                while (row.Read())
+                {
+                    av.Add(row["antivirus"].ToString(), Convert.ToInt32(row["detection"]) == 1 ? "true" : "false");
+                    last_scan = Convert.ToDateTime(row["created_at"]);
+                }
+            }
+            row.Close();
+            Result result = new Result();
+
+            //Form the object
+            result.av = av;
+            result.filename = filenames;
+            result.hash = hash;
+            result.upload_ip = upload_ip;
+            result.first_scan = first_scan;
+            result.last_scan = last_scan;
+            return result;
         }
         public Result getScanResultFromRedisCache(string hash)
         {

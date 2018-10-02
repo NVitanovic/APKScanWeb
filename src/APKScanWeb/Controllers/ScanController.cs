@@ -18,9 +18,16 @@ namespace APKScanWeb.Controllers
         {}
         //-------------------------------------------------------------------------------------------------------------------------------
         [HttpGet("redirect")]
-        public void RedirectToWebsite()
+        public JsonResult RedirectToWebsite()
         {
-            this.Response.Redirect("http://www.apkscan.online/");
+            //this.Response.Redirect("http://www.apkscan.online/");
+            return Json(scanModel.getScanResultFromMySQL("123"));
+        }
+        //-------------------------------------------------------------------------------------------------------------------------------
+        [HttpGet("mysql")]
+        public JsonResult TestMySQL()
+        {
+            return Json(scanModel.getScanResultFromMySQL("123"));
         }
         //-------------------------------------------------------------------------------------------------------------------------------
         [HttpGet("{hash}")]
