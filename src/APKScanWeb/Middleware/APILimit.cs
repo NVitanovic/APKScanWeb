@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Cassandra.Mapping;
 using APKScanWeb.Models.Entities;
+using MySql.Data.MySqlClient;
+
 namespace APKScanWeb.Middleware
 {
     public class APILimit
@@ -27,18 +28,44 @@ namespace APKScanWeb.Middleware
             if (userToken != null && !userToken.All(char.IsLetterOrDigit))
                 httpContext.Response.StatusCode = 406; //not acceptable
 
-            IMapper mapper = new Mapper(dl.cassandra);
-            Access_Count accessCount = null;
-            Access_Time accessTime = null;
-            Access_Tokens accessToken = null;
+            Access_Count accessCount = new Access_Count();
+            Access_Time accessTime = new Access_Time();
+            Access_Tokens accessToken = new Access_Tokens();
 
             //get data
             try
             {
-                 accessCount = mapper.Single<Access_Count>("SELECT * FROM access_count WHERE ip = ?", userIp);
-                 accessTime  = mapper.Single<Access_Time>("SELECT * FROM access_time WHERE ip = ?", userIp);
+                MySqlCommand cmdAccessCount = new MySqlCommand("SELECT ip, COUNT(*) as count FROM access_count WHERE ip = @ip", dl.mysql);
+                cmdAccessCount.Parameters.AddWithValue("@ip", userIp);
+                var row = cmdAccessCount.ExecuteReader();
+                if (row.HasRows)
+                {
+                    row.Read();
+                    accessCount.hits = Convert.ToInt32(row["count"]);
+                    accessCount.ip = row["ip"].ToString();
+                }
+                else
+                {
+                    accessCount = null;
+                }
+                row.Close();
+
+                MySqlCommand cmdAccessTime = new MySqlCommand("SELECT created_at FROM access_count WHERE ip = @ip ORDER BY created_at DESC LIMIT 1", dl.mysql);
+                cmdAccessTime.Parameters.AddWithValue("@ip", userIp);
+                row = cmdAccessTime.ExecuteReader();
+                if (row.HasRows)
+                {
+                    row.Read();
+                    accessTime.ip = userIp;
+                    accessTime.last_access = Convert.ToDateTime(row["created_at"]);
+                }
+                else
+                {
+                    accessTime = null;
+                }
+                row.Close();
             }
-            catch
+            catch(Exception e)
             {
                 accessCount = null;
                 accessTime = null;
@@ -55,7 +82,18 @@ namespace APKScanWeb.Middleware
                         //check if you have access token and it's valid
                         try
                         {
-                            accessToken = mapper.Single<Access_Tokens>("SELECT * FROM access_tokens WHERE token_name = ?", userToken);
+                            MySqlCommand cmdAccessToken = new MySqlCommand("SELECT * FROM access_tokens WHERE token_name = @token LIMIT 1", dl.mysql);
+                            cmdAccessToken.Parameters.AddWithValue("@token", userToken);
+                            var row = cmdAccessToken.ExecuteReader();
+                            if (row.HasRows)
+                            {
+                                row.Read();
+                                accessToken.description = row["description"].ToString();
+                                accessToken.token_name = row["token_name"].ToString();
+                                accessToken.quota = Convert.ToInt32(row["quota"]);
+                                accessToken.valid = Convert.ToBoolean(row["valid"]);
+                            }
+                            row.Close();
 
                             //is token valid
                             if (!accessToken.valid)
@@ -81,21 +119,21 @@ namespace APKScanWeb.Middleware
                 }
                 else //clear the access count if time has passed and update the access_time
                 {
-                    var statementClear = dl.cassandra.Prepare("UPDATE access_count SET hits = hits - ? WHERE ip = ?").Bind(Convert.ToInt64(accessCount.hits), userIp);
-                    var statementTime2 = dl.cassandra.Prepare("UPDATE access_time SET last_access = toTimestamp(now()) WHERE ip = ?").Bind(userIp);
-                    dl.cassandra.Execute(statementTime2);
-                    dl.cassandra.Execute(statementClear);
+
+                    MySqlCommand cmdDeleteAccessCount = new MySqlCommand("DELETE FROM access_count WHERE ip = @ip", dl.mysql);
+                    cmdDeleteAccessCount.Parameters.AddWithValue("@ip", userIp);
+                    cmdDeleteAccessCount.ExecuteNonQuery();
+
                     return _next(httpContext);
                 }
             }
-            
 
-            //write data
-            var statementCount = dl.cassandra.Prepare("UPDATE access_count SET hits = hits + 1 WHERE ip = ?").Bind(userIp);
-            var statementTime = dl.cassandra.Prepare("UPDATE access_time SET last_access = toTimestamp(now()) WHERE ip = ?").Bind(userIp);
 
-            dl.cassandra.Execute(statementCount);
-            dl.cassandra.Execute(statementTime);
+            //write data increase the hit count
+            MySqlCommand cmdAddAccess = new MySqlCommand("INSERT INTO access_count (ip,token) VALUES(@ip,@token)", dl.mysql);
+            cmdAddAccess.Parameters.AddWithValue("@ip", userIp);
+            cmdAddAccess.Parameters.AddWithValue("@token", userToken ?? "");
+            cmdAddAccess.ExecuteNonQuery();
 
             return _next(httpContext);
         }

@@ -29,9 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.0.2" />
     <PackageReference Include="MySql.Data" Version="8.0.12" />
     <PackageReference Include="StackExchange.Redis" Version="1.1.608" />
-    <PackageReference Include="CassandraCSharpDriver" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.WebApiCompatShim" Version="1.0.3" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.2" />
   </ItemGroup>
 
 </Project>

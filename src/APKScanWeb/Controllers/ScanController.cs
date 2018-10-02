@@ -24,12 +24,6 @@ namespace APKScanWeb.Controllers
             return Json(scanModel.getScanResultFromMySQL("123"));
         }
         //-------------------------------------------------------------------------------------------------------------------------------
-        [HttpGet("mysql")]
-        public JsonResult TestMySQL()
-        {
-            return Json(scanModel.getScanResultFromMySQL("123"));
-        }
-        //-------------------------------------------------------------------------------------------------------------------------------
         [HttpGet("{hash}")]
         public JsonResult Get(string hash)
         {

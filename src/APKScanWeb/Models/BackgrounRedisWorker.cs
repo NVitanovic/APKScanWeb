@@ -53,9 +53,9 @@ namespace APKScanWeb.Models
                         //deserialize object
                         RedisReceive obj = JsonConvert.DeserializeObject<RedisReceive>(rawData);
 
-                        //Add to the Cassandra Server
-                        if (!scanModel.addScanResultToCassandra(obj))
-                            throw new Exception("Error while trying to write to Cassandra server from the background Thread!");
+                        //Add to the MySQL Server
+                        if (!scanModel.addScanResultToMySQL(obj))
+                            throw new Exception("Error while trying to write to MySQL server from the background Thread!");
                         //Add to the Redis cache
                         if (!scanModel.addScanResultToRedisCache(obj))
                             throw new Exception("Error while trying to write to Redis server from the background Thread!");
