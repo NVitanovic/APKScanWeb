@@ -183,18 +183,18 @@ namespace APKScanWeb.Models
         }
         public bool addScanResultToMySQL(RedisReceive result)
         {
-            MySqlCommand cmdScan = new MySqlCommand("INSERT INTO scans(hash,filename,ip) VALUES (@hash,@filename,@ip)", dl.mysql);
+            MySqlCommand cmdScan = new MySqlCommand("INSERT INTO scans (hash,filename,ip) VALUES (@hash,@filename,@ip)", dl.mysql);
             cmdScan.Parameters.AddWithValue("@hash", result.hash);
             cmdScan.Parameters.AddWithValue("@ip", result.upload_ip);
             cmdScan.Parameters.AddWithValue("@filename", result.filename);
             cmdScan.ExecuteNonQuery();
             foreach(var x in result.av_results)
             {
-                MySqlCommand cmdAV = new MySqlCommand("INSERT INTO av_results(hash,antivirus,detecton) VALUES (@hash,@antivirus,@detection)", dl.mysql);
+                MySqlCommand cmdAV = new MySqlCommand("INSERT INTO av_results (hash,antivirus,detection) VALUES (@hash,@antivirus,@detection)", dl.mysql);
                 cmdAV.Parameters.AddWithValue("@hash", result.hash);
                 cmdAV.Parameters.AddWithValue("@antivirus", x.Key);
-                cmdAV.Parameters.AddWithValue("@detection", x.Value);
-                cmdScan.ExecuteNonQuery();
+                cmdAV.Parameters.AddWithValue("@detection", x.Value=="true"?true:false);
+                cmdAV.ExecuteNonQuery();
             }
             return true;
         }

@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BCC4CE5D-87FB-49BA-AB47-CA39A791A4AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CB949BAC-CA3F-498E-A540-FAE3A94331EF}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "APKScanWeb", "src\APKScanWeb\APKScanWeb.xproj", "{3B8C0E61-3A0A-4C24-B346-1884DF2339C3}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "APKScanSharedClasses", "..\..\APKScanSharedClasses\APKScanSharedClasses\APKScanSharedClasses.xproj", "{4D3CCF40-3D42-4947-9678-646B62A57FBE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B8C0E61-3A0A-4C24-B346-1884DF2339C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B8C0E61-3A0A-4C24-B346-1884DF2339C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B8C0E61-3A0A-4C24-B346-1884DF2339C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B8C0E61-3A0A-4C24-B346-1884DF2339C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D3CCF40-3D42-4947-9678-646B62A57FBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3CCF40-3D42-4947-9678-646B62A57FBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D3CCF40-3D42-4947-9678-646B62A57FBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D3CCF40-3D42-4947-9678-646B62A57FBE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3B8C0E61-3A0A-4C24-B346-1884DF2339C3} = {BCC4CE5D-87FB-49BA-AB47-CA39A791A4AC}
+		{4D3CCF40-3D42-4947-9678-646B62A57FBE} = {BCC4CE5D-87FB-49BA-AB47-CA39A791A4AC}
+	EndGlobalSection
+EndGlobal
