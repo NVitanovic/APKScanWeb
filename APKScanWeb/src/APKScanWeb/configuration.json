@@ -24,7 +24,7 @@
       "database": "apkscan",
       "replicaset": "apkscan"
     },
-    "FileUploadPath": "D:\\xampp\\htdocs\\download\\",
+    "FileUploadPath": "C:\\xampp\\htdocs\\download\\",
     "MaxHourlyRequests": 999,
     "MaxFileSize": 200
   }

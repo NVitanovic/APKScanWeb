@@ -44,6 +44,15 @@ namespace APKScanWeb.Controllers
             return Json(result);
         }
         //-------------------------------------------------------------------------------------------------------------------------------
+        // CORS options check
+        // OPTIONS api/scan
+        [HttpOptions]
+        public JsonResult Options()
+        {
+            return Json(new { ok = "200" });
+        }
+        // POST api/scan
+        //-------------------------------------------------------------------------------------------------------------------------------
         // upload the file to the server for scanning
         // POST api/scan
         [HttpPost]

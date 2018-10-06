@@ -31,8 +31,16 @@ namespace APKScanWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Allow access to the API trough any origin
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AnyOrigin",
+                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
+
             // Add framework services.
             services.AddMvc();
+
             //load configuration
             var cfg = Configuration.GetSection("Configuration");
             services.Configure<Configuration>(cfg);
@@ -50,9 +58,11 @@ namespace APKScanWeb
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            app.UseCors("AnyOrigin");
             //app.UseMiddleware<RealIP>();
             app.UseMiddleware<APILimit>();
             app.UseMvc();
+            
         }
     }
     //make configuration great again
